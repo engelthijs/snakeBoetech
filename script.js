@@ -141,48 +141,90 @@ snakeHeadImages[3].src = 'cow_4.png';
 
 // Cow Colors Mapping (Body colors matching the images roughly)
 const cowColors = [
-    { base: '#ffffff', spot: '#000000' }, // Cow 1: Black/White
-    { base: '#f4a460', spot: '#8b4513' }, // Cow 2: Brown/Tan
-    { base: '#ffffff', spot: '#8b4513' }, // Cow 3: White/Brown
-    { base: '#d3d3d3', spot: '#555555' }  // Cow 4: Greyish
+    { base: '#f0f0f0', spot: '#1a1a1a' }, // Cow 1: Black/White
+    { base: '#e69b59', spot: '#783812' }, // Cow 2: Highland (Orange/Brown)
+    { base: '#f5f5dc', spot: '#8b4513' }, // Cow 3: Beige/Brown
+    { base: '#d3d3d3', spot: '#555555' }  // Cow 4: Grey Tech
 ];
 
 function drawSnake(player) {
-    const isP1 = player.color === 'p1'; // Still use this for score color if needed, but visuals use cow type
+    const isP1 = player.color === 'p1';
     const cowId = player.cowId || 0;
     const colors = cowColors[cowId] || cowColors[0];
 
     player.body.forEach((segment, index) => {
+        const x = segment.x * GRID_SIZE;
+        const y = segment.y * GRID_SIZE;
+
         if (index === 0) {
-            // HEAD - Draw Image
+            // --- HEAD ROTATION LOGIC ---
+            // Calculate angle based on next segment (neck)
+            let angle = 0;
+            if (player.body.length > 1) {
+                const neck = player.body[1];
+                const dx = segment.x - neck.x;
+                const dy = segment.y - neck.y;
+
+                // Normal movement
+                if (dx === 1) angle = 0;             // Right
+                else if (dx === -1) angle = Math.PI; // Left
+                else if (dy === 1) angle = Math.PI / 2; // Down
+                else if (dy === -1) angle = -Math.PI / 2; // Up
+            }
+
+            // Draw Head with Rotation
+            ctx.save();
+            ctx.translate(x + GRID_SIZE / 2, y + GRID_SIZE / 2);
+            ctx.rotate(angle);
+
+            // Shadow for depth
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = 'rgba(0,0,0,0.5)';
+
             const img = snakeHeadImages[cowId];
-            ctx.shadowBlur = 5;
-            ctx.shadowColor = 'rgba(0,0,0,0.3)';
-            // Draw slightly larger than grid for "pop"
-            ctx.drawImage(img, segment.x * GRID_SIZE - 2, segment.y * GRID_SIZE - 2, GRID_SIZE + 4, GRID_SIZE + 4);
+            // Draw centered
+            // slightly larger (1.5x) to look like a character head
+            const headSize = GRID_SIZE * 1.5;
+            ctx.drawImage(img, -headSize / 2, -headSize / 2, headSize, headSize);
+
+            ctx.restore();
+
+            // Player Indicator (Floating above, non-rotated)
+            ctx.fillStyle = isP1 ? '#ff0055' : '#00ff88';
+            ctx.font = 'bold 14px Nunito';
+            ctx.shadowColor = 'black';
+            ctx.shadowBlur = 4;
+            ctx.fillText(isP1 ? "P1" : "P2", x + 5, y - 10);
             ctx.shadowBlur = 0;
 
-            // Player Indicator
-            ctx.fillStyle = isP1 ? '#ff0055' : '#00ff88';
-            ctx.font = 'bold 12px Nunito';
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 2;
-            ctx.strokeText(isP1 ? "P1" : "P2", segment.x * GRID_SIZE, segment.y * GRID_SIZE - 8);
-            ctx.fillText(isP1 ? "P1" : "P2", segment.x * GRID_SIZE, segment.y * GRID_SIZE - 8);
         } else {
-            // BODY - Rounded Rects with simple shading
-            const isSpot = (segment.x + segment.y) % 2 === 0; // Simple checkerboard pattern for texture
+            // --- BODY 3D SHADER ---
+            // Simple checkerboard for pattern, but with gradient
+            const isSpot = (segment.x + segment.y) % 2 === 0;
 
-            ctx.fillStyle = isSpot ? colors.spot : colors.base;
+            const cx = x + GRID_SIZE / 2;
+            const cy = y + GRID_SIZE / 2;
+            const rad = GRID_SIZE / 2; // Circular segments for smoothness
+
+            const grad = ctx.createRadialGradient(cx - 5, cy - 5, 2, cx, cy, rad);
+            if (isSpot) {
+                grad.addColorStop(0, colors.spot); // Highlight
+                grad.addColorStop(1, '#000000'); // Darker base
+            } else {
+                grad.addColorStop(0, colors.base);
+                grad.addColorStop(1, '#999999');
+            }
 
             ctx.beginPath();
-            ctx.roundRect(segment.x * GRID_SIZE, segment.y * GRID_SIZE, GRID_SIZE, GRID_SIZE, 6);
+            ctx.fillStyle = grad;
+            ctx.arc(cx, cy, rad * 1.1, 0, Math.PI * 2); // Circles overlap to form a tube (seamless)
             ctx.fill();
 
-            // Soft inner shadow/highlight simulation
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-            ctx.stroke();
+            // Shine/Gloss
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.beginPath();
+            ctx.arc(cx - 6, cy - 6, 4, 0, Math.PI * 2);
+            ctx.fill();
         }
     });
 }
@@ -309,13 +351,14 @@ document.addEventListener('keydown', (e) => {
 function drawGame() {
     if (!currentGameState) return;
 
-    // Clear background
-    ctx.fillStyle = '#f8f9fa';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Clear background (Transparent to let CSS background show)
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Grid
-    ctx.strokeStyle = '#e9ecef';
+    // Subtle Tech Grid
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'; // Very faint white
     ctx.lineWidth = 1;
+    // Optional: Use dots instead of lines for a cleaner tech look?
+    // Let's stick to lines but make them barely visible glass lines.
     for (let i = 0; i < TILE_COUNT; i++) {
         ctx.beginPath();
         ctx.moveTo(i * GRID_SIZE, 0);

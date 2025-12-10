@@ -19,7 +19,7 @@ const rooms = {};
 const GRID_SIZE = 30;
 const CANVAS_WIDTH = 600; // As requested
 const TILE_COUNT = CANVAS_WIDTH / GRID_SIZE;
-const FRAME_RATE = 10; // 10 FPS for "Chill Cow" speed
+const FRAME_RATE = 8; // 8 FPS for "BoeTech Heavy" premium feel
 
 function createGameRoom(roomId) {
     return {
