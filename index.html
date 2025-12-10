@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Snake</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <canvas id="cow-1" class="bg-cow cow-pos-1"></canvas>
+    <canvas id="cow-2" class="bg-cow cow-pos-2"></canvas>
+    <canvas id="cow-3" class="bg-cow cow-pos-3"></canvas>
+    <canvas id="cow-4" class="bg-cow cow-pos-4"></canvas>
+    <canvas id="cow-5" class="bg-cow cow-pos-5"></canvas>
+    <canvas id="cow-6" class="bg-cow cow-pos-6"></canvas>
+
+    <div class="snow-container"></div>
+
+    <div id="game-wrapper">
+        <div id="score-board">
+            <span class="p1-score">P1: <span id="score-p1">0</span></span>
+            <span class="divider"> - </span>
+            <span class="p2-score">P2: <span id="score-p2">0</span></span>
+        </div>
+        <div id="branding">
+            <img src="logo.png" alt="Company Logo" id="company-logo">
+        </div>
+        <div id="game-container">
+            <canvas id="game-canvas" width="600" height="600"></canvas>
+
+            <div id="lobby-screen" class="screen">
+                <h1>CHRISTMAS SNAKE</h1>
+                <div class="lobby-controls">
+                    <h3>Choose Your Fighter</h3>
+                    <div class="cow-grid">
+                        <div class="cow-option selected" data-cow="0">
+                            <img src="cow_1.png" alt="Cow 1">
+                        </div>
+                        <div class="cow-option" data-cow="1">
+                            <img src="cow_2.png" alt="Cow 2">
+                        </div>
+                        <div class="cow-option" data-cow="2">
+                            <img src="cow_3.png" alt="Cow 3">
+                        </div>
+                        <div class="cow-option" data-cow="3">
+                            <img src="cow_4.png" alt="Cow 4">
+                        </div>
+                    </div>
+
+                    <button id="create-btn" class="btn">Create Game</button>
+                    <div class="separator-text">OR</div>
+                    <div class="join-group">
+                        <input type="text" id="room-code-input" placeholder="Enter Code">
+                        <button id="join-btn" class="btn">Join</button>
+                    </div>
+                    <p id="error-msg" class="error-text"></p>
+                </div>
+            </div>
+
+            <div id="game-over-screen" class="screen hidden">
+                <h1>GAME OVER</h1>
+                <p class="winner-text"><span id="winner-display"></span> Wins!</p>
+                <button id="restart-btn" class="btn">Back to Lobby</button>
+            </div>
+
+            <div id="waiting-screen" class="screen hidden">
+                <h2 style="margin-bottom: 20px;">Waiting for Opponent...</h2>
+                <div class="code-box">
+                    <span style="font-size: 1.2rem;">ROOM CODE:</span>
+                    <span id="game-code"
+                        style="font-size: 3rem; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 15px; border: 2px dashed gold; display: block; margin: 10px 0;">----</span>
+                </div>
+            </div>
+        </div>
+        <div id="controls-hint">Use Arrow Keys to Move</div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

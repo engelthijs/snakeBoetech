@@ -1,0 +1,435 @@
+@import url('https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Nunito:wght@400;700&display=swap');
+
+:root {
+    --bg-color: #1a472a;
+    /* Deep Forest Green */
+    --game-bg: rgba(255, 255, 255, 0.95);
+    /*  Frosty White */
+    --snake-color: #d63384;
+    --food-color: #ff0055;
+    --border-color: #bfa15f;
+    /* Goldish */
+    --text-color: #fff;
+    --score-color: #ffd700;
+    --start-overlay-bg: rgba(11, 46, 19, 0.95);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    background-image:
+        radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 85% 30%, rgba(255, 0, 0, 0.1) 0%, transparent 20%),
+        repeating-linear-gradient(45deg, #0e2b19 0, #0e2b19 2px, #1a472a 2px, #1a472a 6px);
+    /* Darker green pattern */
+    color: var(--text-color);
+    font-family: 'Nunito', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    perspective: 1000px;
+}
+
+#game-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    position: relative;
+    width: 100%;
+    max-width: 650px;
+}
+
+/* Background Cows (Canvas) */
+.bg-cow {
+    position: fixed;
+    /* Fixed to viewport */
+    width: 280px;
+    /* Consistent size */
+    height: 280px;
+    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5));
+    z-index: -1;
+    animation: float 6s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* Symmetrical Layout - Framing the Game */
+
+/* Top Pair */
+.cow-pos-1 {
+    left: 2%;
+    top: 5%;
+    transform: rotate(15deg);
+}
+
+.cow-pos-2 {
+    right: 2%;
+    top: 5%;
+    transform: rotate(-15deg);
+    animation-delay: 2s;
+}
+
+/* Middle Pair */
+.cow-pos-5 {
+    left: 8%;
+    top: 50%;
+    margin-top: -140px;
+    transform: rotate(-10deg);
+    animation-delay: 1s;
+}
+
+.cow-pos-4 {
+    right: 8%;
+    top: 50%;
+    margin-top: -140px;
+    transform: rotate(10deg);
+    animation-delay: 3s;
+}
+
+/* Bottom Pair */
+.cow-pos-3 {
+    left: 2%;
+    bottom: 0%;
+    transform: rotate(10deg);
+    animation-delay: 4s;
+}
+
+.cow-pos-6 {
+    right: 2%;
+    bottom: 0%;
+    transform: rotate(-10deg);
+    animation-delay: 5s;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(var(--rot));
+    }
+
+    50% {
+        transform: translate(10px, -20px) rotate(var(--rot));
+    }
+}
+
+/* Set rotation vars for animation reuse if needed, or just hardcode in keyframes is simpler but verbose.
+   Simplification: just gentle floating is enough.
+*/
+
+
+#branding {
+    margin-bottom: 1rem;
+    animation: fadeInDown 1s ease-out;
+}
+
+#company-logo {
+    max-height: 120px;
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+}
+
+#score-board {
+    font-family: 'Mountains of Christmas', cursive;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--score-color);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    display: flex;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 5px 20px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.p1-score {
+    color: #ff0055;
+}
+
+/* Red Logic */
+.p2-score {
+    color: #00ff88;
+}
+
+/* Green Logic */
+.divider {
+    color: white;
+    opacity: 0.5;
+}
+
+/* Snow Effect */
+.snow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    background-image:
+        radial-gradient(4px 4px at 10% 10%, rgba(255, 255, 255, 0.8) 50%, transparent),
+        radial-gradient(6px 6px at 20% 30%, rgba(255, 255, 255, 0.7) 50%, transparent),
+        radial-gradient(3px 3px at 40% 70%, rgba(255, 255, 255, 0.9) 50%, transparent),
+        radial-gradient(4px 4px at 50% 10%, rgba(255, 255, 255, 0.8) 50%, transparent),
+        radial-gradient(6px 6px at 60% 30%, rgba(255, 255, 255, 0.7) 50%, transparent),
+        radial-gradient(3px 3px at 80% 50%, rgba(255, 255, 255, 0.8) 50%, transparent),
+        radial-gradient(4px 4px at 90% 80%, rgba(255, 255, 255, 0.6) 50%, transparent);
+    background-size: 500px 500px;
+    animation: snow 10s linear infinite;
+}
+
+@keyframes snow {
+    0% {
+        background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+    }
+
+    100% {
+        background-position: 100px 500px, 50px 500px, -50px 500px, 0 500px, 150px 500px, 50px 500px, 0 500px;
+    }
+}
+
+#game-container {
+    /* Game Container - Glassmorphism Deepened */
+    position: relative;
+    border: 8px solid rgba(191, 161, 95, 0.6);
+    /* Semi-transparent gold */
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6),
+        0 0 0 10px rgba(191, 161, 95, 0.2),
+        inset 0 0 60px rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.85);
+    /* Frostier */
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    /* Check collisions properly within canvas, but round corners */
+}
+
+canvas {
+    display: block;
+    border-radius: 12px;
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--start-overlay-bg);
+    backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 20;
+    opacity: 1;
+    transition: opacity 0.5s;
+}
+
+.screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.screen h1 {
+    font-family: 'Mountains of Christmas', cursive;
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    color: var(--score-color);
+    text-shadow: 4px 4px 0 #cc0000;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.screen p {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: #eee;
+}
+
+/* Button Styling */
+.btn {
+    padding: 15px 40px;
+    font-size: 1.5rem;
+    font-family: 'Mountains of Christmas', cursive;
+    background: linear-gradient(to bottom, #cc0000, #990000);
+    color: white;
+    border: 2px solid #ffcccc;
+    cursor: pointer;
+    border-radius: 50px;
+    text-transform: uppercase;
+    font-weight: bold;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+    min-width: 200px;
+}
+
+.btn:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    filter: brightness(1.1);
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+/* Lobby Styling */
+.lobby-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+    width: 100%;
+}
+
+.lobby-controls h3 {
+    font-family: 'Mountains of Christmas', cursive;
+    color: #ffd700;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.cow-grid {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 1rem;
+}
+
+.cow-option {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.cow-option img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* Ensure cow fits nicely */
+}
+
+.cow-option:hover {
+    transform: scale(1.1);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.cow-option.selected {
+    transform: scale(1.15);
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.join-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+#room-code-input {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    border-radius: 30px;
+    border: 2px solid #bfa15f;
+    outline: none;
+    text-align: center;
+    text-transform: uppercase;
+    font-family: 'Nunito', sans-serif;
+    width: 60%;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.separator-text {
+    color: #ffd700;
+    font-family: 'Mountains of Christmas', cursive;
+    font-size: 1.5rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+#game-code {
+    color: #fff;
+    font-size: 2.5rem;
+    font-family: monospace;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 5px 15px;
+    border-radius: 10px;
+    letter-spacing: 5px;
+    margin-left: 10px;
+    border: 1px dashed #ffd700;
+}
+
+.waiting-text {
+    margin-top: 15px;
+    animation: pulse 1.5s infinite;
+}
+
+.error-text {
+    color: #ff6b6b;
+    font-weight: bold;
+    min-height: 1.2em;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.6;
+    }
+}
+
+#waiting-screen {
+    background-color: rgba(11, 46, 19, 0.4);
+    /* More transparent than standard screen */
+    backdrop-filter: blur(2px);
+    /* Less blur */
+    pointer-events: none;
+    /* Allow seeing inputs if needed, though usually blocked */
+}
+
+#controls-hint {
+    margin-top: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 8px 16px;
+    border-radius: 20px;
+    backdrop-filter: blur(2px);
+}
+
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
